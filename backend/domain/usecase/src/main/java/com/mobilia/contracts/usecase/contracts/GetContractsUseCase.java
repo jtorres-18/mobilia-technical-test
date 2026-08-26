@@ -1,4 +1,4 @@
-package com.mobilia.contracts.usecase.contract;
+package com.mobilia.contracts.usecase.contracts;
 
 import com.mobilia.contracts.model.contract.Contract;
 import com.mobilia.contracts.model.gateways.ContractGateway;
