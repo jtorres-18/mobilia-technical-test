@@ -22,71 +22,114 @@ import java.util.stream.Collectors;
 public class ContractRepositoryAdapter implements ContractGateway {
 
     private static final String SEARCH_QUERY = """
-            SELECT
-                c.id AS contract_id,
-                c.code AS contract_code,
-                c.status AS contract_status,
+        SELECT
+            c.id AS contract_id,
+            c.code AS contract_code,
+            c.status AS contract_status,
 
-                p.id AS property_id,
-                p.address AS property_address,
-                p.type AS property_type,
+            p.id AS property_id,
+            p.address AS property_address,
+            p.type AS property_type,
 
-                cp.id AS party_id,
-                cp.role AS party_role,
+            cp.id AS party_id,
+            cp.role AS party_role,
 
-                pe.id AS person_id,
-                pe.first_name,
-                pe.last_name,
-                pe.identity_document,
-                pe.email
+            pe.id AS person_id,
+            pe.first_name,
+            pe.last_name,
+            pe.identity_document,
+            pe.email
 
-            FROM contracts c
+        FROM contracts c
 
-            INNER JOIN properties p
-                ON p.id = c.property_id
+        INNER JOIN properties p
+            ON p.id = c.property_id
 
-            INNER JOIN contract_parties cp
-                ON cp.contract_id = c.id
+        INNER JOIN contract_parties cp
+            ON cp.contract_id = c.id
 
-            INNER JOIN persons pe
-                ON pe.id = cp.person_id
+        INNER JOIN persons pe
+            ON pe.id = cp.person_id
 
-            WHERE
-                LOWER(c.code) LIKE :pattern
-
-                OR LOWER(p.address) LIKE :pattern
-
-                OR EXISTS (
-                    SELECT 1
-                    FROM contract_parties cp_search
-
-                    INNER JOIN persons pe_search
-                        ON pe_search.id = cp_search.person_id
-
-                    WHERE cp_search.contract_id = c.id
-                      AND (
-                          LOWER(pe_search.first_name) LIKE :pattern
-                          OR LOWER(pe_search.last_name) LIKE :pattern
-                          OR LOWER(
+        WHERE
+            LOWER(TRIM(c.code)) = :searchTerm
+            
+            OR LOWER(TRIM(p.address)) LIKE :addressPattern
+            
+            OR EXISTS (
+                SELECT 1
+                FROM contract_parties cp_search
+            
+                INNER JOIN persons pe_search
+                    ON pe_search.id = cp_search.person_id
+            
+                WHERE cp_search.contract_id = c.id
+                  AND (
+                      LOWER(TRIM(pe_search.first_name)) = :searchTerm
+                      OR LOWER(TRIM(pe_search.last_name)) = :searchTerm
+                      OR LOWER(
+                          TRIM(
                               CONCAT_WS(
                                   ' ',
                                   pe_search.first_name,
                                   pe_search.last_name
                               )
-                          ) LIKE :pattern
-                          OR LOWER(pe_search.identity_document) LIKE :pattern
-                          OR LOWER(pe_search.email) LIKE :pattern
-                      )
-                )
+                          )
+                      ) = :searchTerm
+                      OR LOWER(TRIM(pe_search.identity_document)) = :searchTerm
+                      OR LOWER(TRIM(pe_search.email)) = :searchTerm
+                  )
+            )
 
-            ORDER BY
-                CASE
-                    WHEN c.status = 'ACTIVE' THEN 0
-                    ELSE 1
-                END,
-                c.id DESC,
-                cp.id
-            """;
+        ORDER BY
+            CASE
+                WHEN c.status = 'ACTIVE' THEN 0
+                ELSE 1
+            END,
+            c.id DESC,
+            cp.id
+        """;
+
+
+    private static final String FIND_ALL_QUERY = """
+        SELECT
+            c.id AS contract_id,
+            c.code AS contract_code,
+            c.status AS contract_status,
+
+            p.id AS property_id,
+            p.address AS property_address,
+            p.type AS property_type,
+
+            cp.id AS party_id,
+            cp.role AS party_role,
+
+            pe.id AS person_id,
+            pe.first_name,
+            pe.last_name,
+            pe.identity_document,
+            pe.email
+
+        FROM contracts c
+
+        INNER JOIN properties p
+            ON p.id = c.property_id
+
+        INNER JOIN contract_parties cp
+            ON cp.contract_id = c.id
+
+        INNER JOIN persons pe
+            ON pe.id = cp.person_id
+
+        ORDER BY
+            CASE
+                WHEN c.status = 'ACTIVE' THEN 0
+                ELSE 1
+            END,
+            c.id DESC,
+            cp.id
+        """;
+
 
     private final DatabaseClient databaseClient;
 
@@ -97,12 +140,16 @@ public class ContractRepositoryAdapter implements ContractGateway {
     @Override
     public Flux<Contract> search(String searchTerm) {
 
-        String pattern = "%" + searchTerm
-                .toLowerCase(Locale.ROOT) + "%";
+        String normalizedTerm = searchTerm
+                .trim()
+                .toLowerCase(Locale.ROOT);
+
+        String addressPattern = normalizedTerm + "%";
 
         return databaseClient
                 .sql(SEARCH_QUERY)
-                .bind("pattern", pattern)
+                .bind("searchTerm", normalizedTerm)
+                .bind("addressPattern", addressPattern)
                 .map((row, metadata) -> new ContractRow(
                         row.get("contract_id", Long.class),
                         row.get("contract_code", String.class),
@@ -177,5 +224,33 @@ public class ContractRepositoryAdapter implements ContractGateway {
                 .person(person)
                 .role(PartyRole.valueOf(row.partyRole()))
                 .build();
+    }
+
+    @Override
+    public Flux<Contract> findAll() {
+
+        return databaseClient
+                .sql(FIND_ALL_QUERY)
+                .map((row, metadata) -> new ContractRow(
+                        row.get("contract_id", Long.class),
+                        row.get("contract_code", String.class),
+                        row.get("contract_status", String.class),
+
+                        row.get("property_id", Long.class),
+                        row.get("property_address", String.class),
+                        row.get("property_type", String.class),
+
+                        row.get("party_id", Long.class),
+                        row.get("party_role", String.class),
+
+                        row.get("person_id", Long.class),
+                        row.get("first_name", String.class),
+                        row.get("last_name", String.class),
+                        row.get("identity_document", String.class),
+                        row.get("email", String.class)
+                ))
+                .all()
+                .collectList()
+                .flatMapMany(this::mapContracts);
     }
 }
