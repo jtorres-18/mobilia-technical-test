@@ -562,7 +562,7 @@ Reliability Issues  0
 Maintainability     0 open issues
 Duplications        0.0%
 ```
-
+![SonarQube Quality Gate](docs/sonarqube-quality-gate.png)
 El objetivo del análisis fue validar tanto la cobertura de pruebas como aspectos de mantenibilidad, seguridad y calidad estática del código.
 
 ---
