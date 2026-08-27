@@ -206,3 +206,34 @@ La URL del backend puede configurarse mediante:
 ```env
 VITE_API_URL=http://localhost:8080/api/v1
 ```
+---
+## Análisis opcional con SonarQube
+
+El repositorio incluye una configuración Docker para ejecutar SonarQube localmente.
+
+Levantar SonarQube:
+
+```bash
+docker compose -f docker-compose.sonar.yml up -d
+```
+
+Luego abrir:
+
+```text
+http://localhost:9000
+```
+
+El análisis del backend puede ejecutarse desde la carpeta `backend` una vez configurado un token local de SonarQube.
+
+### PowerShell
+
+```powershell
+$env:SONAR_TOKEN="YOUR_LOCAL_SONAR_TOKEN"
+
+.\mvnw.cmd clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar `
+  "-Dsonar.projectKey=mobilia-technical-test" `
+  "-Dsonar.projectName=Mobilia Technical Test" `
+  "-Dsonar.host.url=http://localhost:9000"
+```
+
+> Los tokens de SonarQube no se almacenan en el repositorio.
