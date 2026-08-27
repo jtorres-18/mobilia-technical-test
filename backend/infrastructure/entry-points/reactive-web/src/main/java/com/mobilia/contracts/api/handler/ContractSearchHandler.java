@@ -25,7 +25,7 @@ public class ContractSearchHandler {
         this.getContractsUseCase = getContractsUseCase;
         this.searchContractsUseCase = searchContractsUseCase;
     }
-
+    @SuppressWarnings("java:S1172")
     public Mono<ServerResponse> findAll(ServerRequest request) {
 
         return getContractsUseCase.execute()

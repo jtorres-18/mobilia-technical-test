@@ -1,6 +1,7 @@
 package com.mobilia.contracts.api;
 
 import com.mobilia.contracts.api.handler.ContractSearchHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -11,15 +12,21 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @Configuration
 public class RouterRest {
 
-    private static final String BASE_PATH = "/api/v1/contracts";
+    private final String basePath;
+
+    public RouterRest(
+            @Value("${api.contracts.base-path}") String basePath
+    ) {
+        this.basePath = basePath;
+    }
 
     @Bean
     public RouterFunction<ServerResponse> contractRoutes(
             ContractSearchHandler handler
     ) {
         return route()
-                .GET(BASE_PATH, handler::findAll)
-                .GET(BASE_PATH + "/search", handler::search)
+                .GET(basePath, handler::findAll)
+                .GET(basePath + "/search", handler::search)
                 .build();
     }
 }

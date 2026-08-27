@@ -35,38 +35,19 @@ INSERT INTO persons (
 -- CONTRACTS
 -- =========================================================
 
--- Property 1:
--- One active contract + one historical inactive contract.
+
 INSERT INTO contracts (id, code, status, property_id) VALUES
                                                           (1, 'MBL-A100', 'ACTIVE', 1),
                                                           (2, 'MBL-A090', 'INACTIVE', 1),
-
--- Property 2:
--- One active contract.
                                                           (3, 'MBL-C200', 'ACTIVE', 2),
-
--- Property 3:
--- One inactive historical contract + one active contract.
                                                           (4, 'MBL-L300', 'INACTIVE', 3),
                                                           (5, 'MBL-L301', 'ACTIVE', 3),
-
--- Property 4:
--- One active contract.
                                                           (6, 'MBL-A400', 'ACTIVE', 4);
-
 
 -- =========================================================
 -- CONTRACT PARTIES
 -- =========================================================
 
--- ---------------------------------------------------------
--- CONTRACT 1 - MBL-A100
--- Property: Calle 10 # 35-20
---
--- Tenant: Laura Gomez
--- Owners: Carlos Restrepo, Ana Torres
--- Guarantor: Sofia Herrera
--- ---------------------------------------------------------
 
 INSERT INTO contract_parties (contract_id, person_id, role) VALUES
                                                                 (1, 1, 'TENANT'),
@@ -74,46 +55,18 @@ INSERT INTO contract_parties (contract_id, person_id, role) VALUES
                                                                 (1, 3, 'OWNER'),
                                                                 (1, 5, 'GUARANTOR');
 
-
--- ---------------------------------------------------------
--- CONTRACT 2 - MBL-A090
--- Historical contract for the same property.
---
--- Tenant: Mateo Ruiz
--- Owner: Carlos Restrepo
--- No guarantor.
 -- ---------------------------------------------------------
 
 INSERT INTO contract_parties (contract_id, person_id, role) VALUES
                                                                 (2, 4, 'TENANT'),
                                                                 (2, 2, 'OWNER');
 
-
--- ---------------------------------------------------------
--- CONTRACT 3 - MBL-C200
---
--- Tenant: Daniel Castro
--- Owner: Valentina Marin
--- Guarantor: Ana Torres
---
--- Ana Torres was OWNER in contract 1 and GUARANTOR here.
--- This validates that a person can have different roles
--- in different contracts.
 -- ---------------------------------------------------------
 
 INSERT INTO contract_parties (contract_id, person_id, role) VALUES
                                                                 (3, 6, 'TENANT'),
                                                                 (3, 7, 'OWNER'),
                                                                 (3, 3, 'GUARANTOR');
-
-
--- ---------------------------------------------------------
--- CONTRACT 4 - MBL-L300
--- Historical contract.
---
--- Tenant: Miguel Rojas
--- Owner: Juliana Velez
--- Guarantor: Sofia Herrera
 -- ---------------------------------------------------------
 
 INSERT INTO contract_parties (contract_id, person_id, role) VALUES
@@ -121,14 +74,6 @@ INSERT INTO contract_parties (contract_id, person_id, role) VALUES
                                                                 (4, 9, 'OWNER'),
                                                                 (4, 5, 'GUARANTOR');
 
-
--- ---------------------------------------------------------
--- CONTRACT 5 - MBL-L301
--- Current contract for the same commercial property.
---
--- Tenant: Laura Gomez
--- Owner: Juliana Velez
--- Guarantor: Daniel Castro
 -- ---------------------------------------------------------
 
 INSERT INTO contract_parties (contract_id, person_id, role) VALUES
@@ -137,14 +82,6 @@ INSERT INTO contract_parties (contract_id, person_id, role) VALUES
                                                                 (5, 6, 'GUARANTOR');
 
 
--- ---------------------------------------------------------
--- CONTRACT 6 - MBL-A400
---
--- Tenant: Valentina Marin
--- Owner: Mateo Ruiz
--- No guarantor.
---
--- Mateo was TENANT in contract 2 and OWNER here.
 -- ---------------------------------------------------------
 
 INSERT INTO contract_parties (contract_id, person_id, role) VALUES

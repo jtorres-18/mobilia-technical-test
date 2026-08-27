@@ -18,10 +18,6 @@ public class SearchContractsUseCase {
         String normalizedTerm = searchTerm.trim();
 
         return contractGateway.search(normalizedTerm)
-                .switchIfEmpty(
-                        Flux.error(
-                                new ContractNotFoundException(normalizedTerm)
-                        )
-                );
+                .switchIfEmpty(Flux.error(new ContractNotFoundException(normalizedTerm)));
     }
 }

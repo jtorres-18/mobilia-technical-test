@@ -30,11 +30,11 @@ function ContractTable({ contracts }) {
                 <tr>
                     <th>Contrato</th>
                     <th>Estado</th>
-                    <th>Inmueble</th>
+                    <th>Direccion</th>
                     <th>Tipo</th>
                     <th>Arrendatario</th>
                     <th>Propietarios</th>
-                    <th>Fiadores</th>
+                    <th>Deudor</th>
                 </tr>
                 </thead>
 
